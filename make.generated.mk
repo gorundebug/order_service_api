@@ -2,6 +2,7 @@
 MODULE_DIR := $(abspath .)
 TOOLS_DIR ?= $(abspath ../tools)
 BUF := $(TOOLS_DIR)/buf
+PROTOC ?= $(TOOLS_DIR)/protoc
 OAPI_CODEGEN_VERSION := v2.4.1
 OAPI_CODEGEN := $(TOOLS_DIR)/oapi-codegen
 
@@ -10,10 +11,10 @@ OAPI_CODEGEN := $(TOOLS_DIR)/oapi-codegen
 all: gen-proto gen-openapi
 
 gen-proto:
-	@find . -type f -name 'go.proto.mk' | while read mkfile; do \
+	@find . -type f -name 'go.generated.proto.mk' | while read mkfile; do \
 		dir=$$(dirname $$mkfile); \
 		echo "Generating files in $$dir..."; \
-		$(MAKE) -C $$dir -f $$(basename $$mkfile) gen MODULE_DIR="$(MODULE_DIR)"; \
+		$(MAKE) -C $$dir -f $$(basename $$mkfile) gen MODULE_DIR="$(MODULE_DIR)" PROTOC="$(PROTOC)"; \
 	done
 
 fmt-proto:
@@ -27,7 +28,7 @@ $(OAPI_CODEGEN):
 	@GOBIN=$(TOOLS_DIR) go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@$(OAPI_CODEGEN_VERSION)
 
 gen-openapi: $(OAPI_CODEGEN)
-	@find . -type f -name 'go.openapi.mk' | while read mkfile; do \
+	@find . -type f -name 'go.generated.openapi.mk' | while read mkfile; do \
 		dir=$$(dirname $$mkfile); \
 		echo "Generating files in $$dir..."; \
 		$(MAKE) -C $$dir -f $$(basename $$mkfile) gen MODULE_DIR="$(MODULE_DIR)" OAPI_CODEGEN="$(OAPI_CODEGEN)"; \
